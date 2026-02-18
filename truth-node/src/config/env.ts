@@ -26,7 +26,7 @@ const envSchema = z.object({
     REDIS_PASSWORD: z.string().optional(),
 
     // AI Keys
-    GEMINI_API_KEY: z.string(),
+    GEMINI_API_KEY: z.string().optional(),
     OPENAI_API_KEY: z.string().optional(),
     ANTHROPIC_API_KEY: z.string().optional(),
     GROQ_API_KEY: z.string().optional(),

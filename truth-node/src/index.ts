@@ -32,9 +32,10 @@ bootstrapRegistry({
     openWeatherKey: envConfig.OPENWEATHER_API_KEY,
     fredApiKey: envConfig.FRED_API_KEY,
     alphaVantageKey: envConfig.ALPHAVANTAGE_KEY,
-    theOddsApiKey: envConfig.THEODDS_API_KEY || envConfig.THEODDS_KEY, // Correctly mapped
-    sportsDbKey: undefined, // No key available in env
-    groqKey: envConfig.GROQ_API_KEY // Added Groq Support
+    theOddsApiKey: envConfig.THEODDS_API_KEY || envConfig.THEODDS_KEY,
+    groqKey: envConfig.GROQ_API_KEY,
+    useProxy: true,
+    proxyUrl: envConfig.INDEXER_API_URL
 } as any);
 
 // --- API Routes ---

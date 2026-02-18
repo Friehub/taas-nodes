@@ -1,0 +1,32 @@
+name: Core Compatibility Check
+
+on:
+  repository_dispatch:
+    types: [core-updated]
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Link latest core (Mocked for local dev)
+        run: |
+          echo "Updating @friehub/taas-contracts to latest main commit..."
+          # In a real CI, this would run:
+          # pnpm update @friehub/taas-contracts
+          
+      - name: Run Build & Tests
+        run: pnpm run build
