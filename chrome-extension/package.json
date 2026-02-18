@@ -1,0 +1,37 @@
+{
+    "name": "@friehub/chrome-extension",
+    "version": "1.0.0",
+    "private": true,
+    "description": "TaaS Sentinel Lite for Chrome",
+    "scripts": {
+        "build": "webpack --config webpack.config.js",
+        "watch": "webpack --config webpack.config.js --watch"
+    },
+    "dependencies": {
+        "@friehub/recipes": "workspace:*",
+        "ethers": "^6.11.1",
+        "react": "^18.2.0",
+        "react-dom": "^18.3.1",
+        "viem": "^2.7.1"
+    },
+    "devDependencies": {
+        "@types/chrome": "^0.0.260",
+        "@types/react": "^18.2.55",
+        "@types/react-dom": "^18.2.19",
+        "assert": "^2.1.0",
+        "buffer": "^6.0.3",
+        "copy-webpack-plugin": "^12.0.2",
+        "crypto-browserify": "^3.12.1",
+        "https-browserify": "^1.0.0",
+        "os-browserify": "^0.3.0",
+        "process": "^0.11.10",
+        "stream-browserify": "^3.0.0",
+        "stream-http": "^3.2.0",
+        "ts-loader": "^9.5.1",
+        "typescript": "^5.3.3",
+        "url": "^0.11.4",
+        "vm-browserify": "^1.1.2",
+        "webpack": "^5.90.1",
+        "webpack-cli": "^5.1.4"
+    }
+}

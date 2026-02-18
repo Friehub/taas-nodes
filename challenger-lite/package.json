@@ -1,0 +1,29 @@
+{
+    "name": "@friehub/challenger-lite",
+    "version": "1.0.3",
+    "private": true,
+    "description": "Permissionless Challenger Node for TaaS Protocol",
+    "main": "dist/index.js",
+    "bin": {
+        "friehub-challenger": "dist/cli.js"
+    },
+    "scripts": {
+        "build": "tsc --build",
+        "start": "node dist/index.js",
+        "dev": "ts-node src/index.ts"
+    },
+    "dependencies": {
+        "@friehub/execution-engine": "workspace:*",
+        "@friehub/recipes": "workspace:*",
+        "chalk": "^4.1.2",
+        "commander": "^11.1.0",
+        "dotenv": "^16.3.1",
+        "viem": "^2.0.0",
+        "ts-node": "^10.9.1",
+        "typescript": "^5.0.0"
+    },
+    "devDependencies": {
+        "@types/minimatch": "^6.0.0",
+        "@types/node": "^20.0.0"
+    }
+}

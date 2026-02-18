@@ -1,0 +1,13 @@
+{
+    "name": "friehub-nodes-ecosystem",
+    "private": true,
+    "scripts": {
+        "dev:truth": "pnpm --filter @friehub/truth-node dev",
+        "dev:challenger": "pnpm --filter @friehub/challenger-lite dev",
+        "build": "pnpm -r build",
+        "start:truth": "pnpm --filter @friehub/truth-node start"
+    },
+    "devDependencies": {
+        "typescript": "^5.3.3"
+    }
+}

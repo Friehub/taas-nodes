@@ -1,0 +1,4 @@
+packages:
+  - 'truth-node'
+  - 'challenger-lite'
+  - 'chrome-extension'

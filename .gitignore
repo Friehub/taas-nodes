@@ -1,0 +1,59 @@
+# Node modules
+node_modules/
+.npm/
+.pnpm-store/
+
+# Next.js build artifacts
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+.pnpm-debug.log*
+
+# Dependencies
+/lib
+
+# Environment variables
+.env
+.env.*
+!.env.example
+!.env.snippet
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor/OS files
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Solidity artifacts
+artifacts/
+# cache/ (This ignores src/cache too!)
+hardhat-cache/
+foundry-cache/
+typechain/
+typechain-types/
+
+# Testing
+coverage/
+.nyc_output
+
+# Temp files
+tmp/
+temp/
+
+# Local Deployment Scripts (Hardcoded addresses)
+protocol/contracts/scripts/testDeployment.ts
+protocol/contracts/scripts/requestTruth.ts
+
+# Chrome Extension Artifacts
+*.zip
+taas-extension/
