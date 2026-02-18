@@ -1,38 +1,38 @@
 # Friehub Protocol Nodes
 
-Official client implementations for the Friehub Truth-as-a-Service (TaaS) decentralized network. This repository contains the software required to operate as a Sentinel or Challenger within the ecosystem.
+Official client implementations for the Friehub Truth-as-a-Service (TaaS) decentralized network. This repository provides the necessary infrastructure to operate as a Sentinel or Challenger within the Friehub ecosystem.
 
 ## Repository Structure
 
-- **truth-node/**: The primary Node.js client. It handles data verification, consensus participation, and rich outcome proposals.
-- **challenger-lite/**: A lightweight monitoring client for dispute resolution and circuit-based auditing.
-- **chrome-extension/**: Browser-based verification tools and wallet integration.
+- **truth-node/**: The primary Node.js implementation for data verification, consensus participation, and outcome proposals.
+- **challenger-lite/**: A specialized client for monitoring network integrity and performing circuit-based audits.
+- **chrome-extension/**: Browser-based verification utilities and wallet integration tools.
 
-## Getting Started
+## Node Registration and Setup
 
-### Prerequisites
-- Node.js (v18+)
-- pnpm (v8+)
+The Friehub Protocol utilizes a "Keyless Node" architecture. Node operators do not need to manage individual data provider API keys; instead, authentication is proxied through the centralized Truth Gateway.
 
-### Installation
-From the root of the repository:
-```bash
-pnpm install
-```
+### 1. Registration
+To register a new node, use the official Friehub User Dashboard.
+- Navigate to the "Register Node" section.
+- Generate a Provisioning Code.
+- Download the generated `.env` configuration bundle.
 
-### Running a Truth Node
-1. Navigate to the truth-node directory: `cd truth-node`
-2. Configure your environment: `cp .env.example .env`
-3. Start the node in development mode: `pnpm run dev`
+### 2. Deployment
+Most nodes are distributed as Docker containers for maximum stability.
+- Ensure the downloaded `.env` file is present in the node directory.
+- Execute `docker-compose up -d`.
 
-## Deployment
-
-For production environments, it is recommended to use the bundled distribution or the official Docker images.
+## Prerequisites
+- Node.js (v20+)
+- Linux/Amd64 environment (Recommended)
+- Funded Helios wallet for on-chain identities
 
 ## Architecture
 
-This repository is part of the Friehub decentralized ecosystem. It consumes core protocol logic and smart contract interfaces from the private `taas-core` through automated distribution pipelines.
+This repository is a core component of the Friehub ecosystem. it consumes protocol logic and contract interfaces from the `taas-core` library. Synchronization between repositories is automated via repository dispatch triggers.
 
 ## License
 
-MIT
+Copyright (c) 2026 Friehub Protocol. All rights reserved.
+Licensed under the MIT License.

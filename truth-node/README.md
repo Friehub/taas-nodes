@@ -2,11 +2,7 @@
 
 **The official execution and verification client for the Friehub Truth Service (FTS) Protocol.**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-
-The FTS Node is a critical component of the localized truth consensus network. It is designed to operate in two distinct modes—**Sentinel** and **Challenger**—ensuring the integrity, availability, and accuracy of data feeds powered by the FTS Protocol.
-
----
+The FTS Node is a high-performance execution client designed to secure the localized truth consensus network. It operates in two primary modes—Sentinel and Challenger—ensuring the integrity, availability, and accuracy of data feeds powered by the FTS Protocol.
 
 ## Table of Contents
 
@@ -16,185 +12,93 @@ The FTS Node is a critical component of the localized truth consensus network. I
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Usage](#usage)
-  - [Sentinel Mode](#sentinel-mode)
-  - [Challenger Mode](#challenger-mode)
 - [Observability](#observability)
-- [API Reference](#api-reference)
 - [Troubleshooting](#troubleshooting)
 - [License](#license)
 
----
-
 ## Overview
 
-The FTS Node acts as the bridge between off-chain data and the on-chain Truth Oracle. It is responsible for fetching real-world data, generating cryptographic proofs, and securing the network against malicious actors.
+The FTS Node serves as the interface between off-chain data sources and the on-chain Truth Oracle. It is responsible for data aggregation, cryptographic attestation, and maintaining network consensus.
 
 ### Core Capabilities
 
-- **Resilient Data Fetching**: Utilizes the `@friehub/data-feeds` package to aggregate data from 50+ sources with automatic failover.
-- **Cryptographic Attestation**: Signs data payloads using EIP-712 standard for on-chain verification.
-- **Deterministic Execution**: Runs "Recipes" (standardized data fetching scripts) in a sandboxed environment.
-- **Economic Security**: Stakes FTS tokens to back the truthfulness of proposed outcomes.
-
----
+- **Keyless Data Fetching**: Utilizes a centralized Truth Gateway to access authenticated data sources without requiring local API keys.
+- **Cryptographic Proofs**: Signatures adhere to the EIP-712 standard for robust on-chain validation.
+- **Deterministic Execution**: Implements "Data Recipes" within a secure runtime environment.
+- **Economic Security**: Integrates with the NodeRegistry to manage stakes and operational identities.
 
 ## Architecture
 
-The node executes logic based on its configured `NODE_MODE`.
+The node behavior is defined by its operational mode.
 
 ### 1. Sentinel Mode (Proposer)
-*   **Role**: Service Provider.
-*   **Function**: Listens for `RecipeRequested` events from the Truth Oracle, executes the corresponding recipe, and submits the result (Outcome) to the blockchain.
-*   **Incentive**: Earns a fee (in HLS) for every finalized proposal.
+Sentinels are primary service providers. They listen for data requests, execute corresponding recipes, and submit verified outcomes to the blockchain to earn protocol fees.
 
 ### 2. Challenger Mode (Verifier)
-*   **Role**: Network Guardian.
-*   **Function**: Monitors all incoming proposals from other nodes. It re-executes the recipe locally to verify the result. If a discrepancy is found, it issues a **Dispute**.
-*   **Incentive**: Earns the slashed bond of the malicious Sentinel.
-
----
+Challengers act as network guardians. They monitor incoming proposals in real-time, re-executing data recipes to verify correctness and initiating disputes against malicious or incorrect proposals.
 
 ## Prerequisites
 
-Before running the node, ensure your environment meets the following requirements:
-
-*   **Node.js**: v18.0.0 or higher
-*   **Redis**: v6.0+ (Required for job queue management)
-*   **Helios RPC Endpoint**: A reliable connection to the Helios Testnet (WebSocket recommended for Challengers).
-*   **Wallet**: An EVM-compatible wallet funded with HLS tokens.
-
----
+- **Node.js**: v20.0.0 or higher
+- **Redis**: v7.0+ (Utilized for operational state and job queues)
+- **RPC Endpoint**: A reliable connection to the Helios blockchain (WebSockets required for Challengers)
+- **Identity**: An EVM-compatible private key with sufficient balance for transaction fees.
 
 ## Installation
 
-Clone the repository and install dependencies:
+Standard installation via pnpm:
 
 ```bash
-git clone https://github.com/friehub/taas-core.git
-cd taas-core/nodes/truth-node
-npm install
+pnpm install
+pnpm run build
 ```
-
-Build the project:
-
-```bash
-npm run build
-```
-
----
 
 ## Configuration
 
-The node is configured via environment variables. Copy the example file to get started:
+The FTS Node is designed for "Keyless" operation. Most data provider keys are managed by the centralized Truth Gateway.
 
-```bash
-cp .env.example .env
-```
+### Environment Setup
 
-### Required Configuration
+Configuration is managed via environment variables.
 
-| Variable | Description | Example |
-| :--- | :--- | :--- |
-| `NODE_ENV` | Operational environment | `production` |
-| `NODE_MODE` | Operational mode of the node | `sentinel`, `challenger`, or `both` |
-| `PRIVATE_KEY` | EVM Wallet Private Key (Hex) | `0xabc...` |
-| `RPC_URL` | Helios Blockchain RPC Endpoint | `https://testnet1.helioschainlabs.org` |
-| `ORACLE_ADDRESS`| Address of TruthOracleV2 Contract | `0x383E...` |
-| `ORACLE_ADDRESS`| Address of TAASToken Contract | `0x7e6a...` |
-
-### Optional Configuration
-
-| Variable | Description | Default |
-| :--- | :--- | :--- |
-| `NODE_ID` | Human-readable identifier for logs | `truth-node` |
-| `REDIS_URL` | Connection string for Redis | `redis://localhost:6379` |
-| `LOG_LEVEL` | Logging verbosity | `info` |
-| `PORT` | HTTP Server Port | `3001` |
-| `MINIMUM_BOND` | Min. stake required to propose (Wei) | `10 ETH` |
-
----
+| Variable | Description |
+| :--- | :--- |
+| `NODE_MODE` | `sentinel`, `challenger`, or `both` |
+| `PRIVATE_KEY` | EIP-712 identification key |
+| `RPC_URL` | Helios RPC connection URL |
+| `ORACLE_ADDRESS` | Address of the TruthOracle contract |
+| `INDEXER_API_URL` | URL of the Truth Gateway / Indexer service |
 
 ## Usage
 
-### Sentinel Mode
-
-Run the node to actively propose outcomes:
-
+### Production Execution
 ```bash
-NODE_MODE=sentinel npm start
+pnpm start
 ```
 
-### Challenger Mode
-
-Run the node to purely verify the network:
-
+### Development Mode
 ```bash
-NODE_MODE=challenger npm start
+pnpm run dev
 ```
-
-### Development
-
-For local development with hot-reloading:
-
-```bash
-npm run dev
-```
-
----
 
 ## Observability
 
-### Logging
+### Metrics
+JSON-structured logs are emitted to `stdout`. Prometheus metrics are available at `/metrics` (Default port: 3001).
 
-The node uses `pino` for structured JSON logging. Logs are output to `stdout` and can be piped to any log aggregator (Datadog, CloudWatch, etc.).
-
-```json
-{"level":30,"time":167823,"msg":"[TruthNode] Information Sentinel running","port":3001}
-```
-
-### Metrics (Prometheus)
-
-Prometheus-compatible metrics are exposed at `http://localhost:3001/metrics`.
-
-*   `truth_requests_total`: Total data requests received.
-*   `truth_proposals_total`: Outcomes proposed to the chain.
-*   `truth_disputes_total`: Disputes initiated (Challenger mode).
-*   `truth_bond_locked`: Current asset value locked in bonds.
-
----
-
-## API Reference
-
-The node exposes a lightweight REST API for health checks and local management.
-
-#### `GET /health`
-Returns the operational status of the node.
-```json
-{ "status": "ok", "mode": "sentinel", "uptime": 120 }
-```
-
-#### `GET /api/admin/stats`
-Returns current performance statistics (used by the TaaS Dashboard).
-
----
+- `truth_requests_total`: Throughput of ingestion.
+- `truth_proposals_total`: Total on-chain submissions.
+- `truth_disputes_total`: Successful integrity challenges.
 
 ## Troubleshooting
 
-**Issue: Node fails to start with "Invalid Private Key"**
-> Ensure your `PRIVATE_KEY` in `.env` starts with `0x` and is exactly 64 hex characters.
+### Connection Refused
+Ensure the Redis service is active and accessible via the configured `REDIS_HOST`.
 
-**Issue: "Insufficient Funds" error**
-> The wallet must hold enough HLS to pay for transaction fees and the required proposal bond (default 10 HLS).
-
-**Issue: Redis Connection Refused**
-> Ensure a local Redis instance is running (`redis-server`) or update `REDIS_URL` to point to your managed Redis instance.
-
----
+### Insufficient Funds
+The operational wallet must maintain a minimum balance to cover gas fees for outcome proposals and dispute bonds.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](../../LICENSE) file for details.
-
----
-
-**Copyright (c) 2026 FrieHub Protocol.**
+Copyright (c) 2026 Friehub Protocol.
+Licensed under the MIT License.

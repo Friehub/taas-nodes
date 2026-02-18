@@ -1,52 +1,39 @@
-# FTS Browser Verification Node (Chrome Extension)
+# Friehub Browser Verification Node (Chrome Extension)
 
-**Run a lightweight FTS verifier directly in your browser.**
+**Browser-based execution and verification client.**
 
-This extension allows users to participate in the FTS network as a light challenger node, verifying truth proposals in the background while browsing.
-
----
+The Friehub Chrome Extension enables lightweight participation in the FTS network as a verification client. It allows users to verify truth proposals in a browser-native environment, contributing to network decentralized integrity.
 
 ## Features
 
-- **Lightweight Verification**: Verifies simple logic recipes without heavy infrastructure.
-- **Privacy First**: Runs locally in your browser sandbox.
-- **Network Stats**: View real-time FTS network statistics.
-- **Wallet Integration**: Connect EVM wallet to stake on disputes.
+- **Integrated Verification**: Executes lightweight data recipes within the browser sandbox.
+- **Protocol Observability**: Displays real-time FTS network statistics and proposal throughput.
+- **Secure Integration**: Connects with standard browser wallets for EIP-712 signing and stake management.
 
----
+## Development and Build
 
-## Development
-
-### Build
-
+### Build Instructions
 ```bash
-# Install dependencies
-npm install
-
-# Build extension
-npm run build
+pnpm install
+pnpm run build
 ```
 
-### Load in Chrome
+### Installation
+1. Open `chrome://extensions/` in a Chromium-based browser.
+2. Enable "Developer mode".
+3. Select "Load unpacked".
+4. Navigate to the `dist/` directory of this sub-module.
 
-1. Open `chrome://extensions/`
-2. Enable **Developer mode**
-3. Click **Load unpacked**
-4. Select the `dist/` folder
+## Technical Architecture
 
----
+The extension implements a subset of the FTS execution engine, optimized for browser environments. It facilitates:
+- API-based data ingestion (HTTPS).
+- JSON/Regex transformation logic.
+- Arithmetic verification.
 
-## Architecture
-
-The extension runs a stripped-down version of the execution engine, capable of verifying:
-- API-based recipes (GET requests)
-- Regex/JSON parsing
-- Basic arithmetic
-
-It communicates with the `TruthOracleV2` contract via a public RPC endpoint.
-
----
+Communication with the `TruthOracle` is maintained via authenticated RPC endpoints.
 
 ## License
 
-MIT
+Copyright (c) 2026 Friehub Protocol.
+Licensed under the MIT License.
