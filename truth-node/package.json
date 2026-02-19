@@ -1,6 +1,6 @@
 {
     "name": "@friehub/truth-node",
-    "version": "1.0.3",
+    "version": "1.0.5",
     "private": true,
     "description": "Official TaaS Protocol Node: Sentinel & Challenger Client",
     "keywords": [
@@ -19,14 +19,16 @@
     "scripts": {
         "build": "tsc",
         "bundle": "ncc build src/index.ts -o dist/bundle --minify --no-cache && cp package.json dist/bundle/",
+        "start:challenger": "NODE_MODE=challenger node dist/index.js",
         "start": "node dist/index.js",
         "dev": "ts-node src/index.ts",
-        "lint": "eslint src/**/*.ts"
+        "test:connection": "ts-node src/scripts/test-connection.ts",
+        "lint": "eslint src --ext .ts"
     },
     "dependencies": {
-        "@friehub/data-feeds": "workspace:*",
-        "@friehub/execution-engine": "workspace:*",
         "@friehub/recipes": "workspace:*",
+        "@friehub/execution-engine": "workspace:*",
+        "@friehub/taas-sdk": "workspace:*",
         "@types/cors": "^2.8.19",
         "axios": "^1.13.5",
         "bullmq": "^5.1.1",

@@ -1,5 +1,5 @@
 import { encodeAbiParameters, parseAbiParameters, type Hex } from 'viem';
-import { RecipeExecutionResult } from '@friehub/execution-engine';
+import { RecipeExecutionResult } from '@friehub/taas-sdk';
 
 /**
  * TruthOracleV2 Outcome Type enum (matches Solidity)

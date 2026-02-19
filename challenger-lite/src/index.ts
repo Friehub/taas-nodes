@@ -1,9 +1,9 @@
 import { createPublicClient, http, parseAbiItem } from 'viem';
-import { mainnet, polygon, base } from 'viem/chains';
-import { RecipeExecutor } from '@friehub/execution-engine';
+import { polygon } from 'viem/chains';
 import { RecipeRegistry, RecipeInstance } from '@friehub/recipes';
 import dotenv from 'dotenv';
 import chalk from 'chalk';
+import axios from 'axios';
 
 import path from 'path';
 dotenv.config({ path: path.resolve(__dirname, '../../../../../.env') });
@@ -11,6 +11,7 @@ dotenv.config();
 
 const RPC_URL = process.env.RPC_URL || 'https://polygon-rpc.com';
 const ORACLE_ADDRESS = process.env.ORACLE_ADDRESS as `0x${string}`;
+const GATEWAY_URL = process.env.INDEXER_API_URL || 'http://localhost:3002';
 
 const publicClient = createPublicClient({
     chain: polygon, // Default to polygon, can be dynamic
@@ -54,12 +55,18 @@ async function startChallenger() {
                     }
 
                     const template = new RecipeInstance(templateData);
-                    console.log(chalk.gray(`  Re-verifying logic flow...`));
-                    const recipe = template.toRecipe();
-                    const result = await RecipeExecutor.execute(recipe, inputs);
+                    console.log(chalk.gray(`  Requesting sovereign gate verification...`));
 
-                    console.log(chalk.green(`  Local Verification Finished.`));
-                    console.log(`Independent Outcome: ${result.winningOutcome}`);
+                    // Call the Sovereign Gateway instead of local executor
+                    const response = await axios.post(`${GATEWAY_URL}/proxy/verify`, {
+                        template: templateData,
+                        inputs
+                    });
+
+                    const result = response.data.result;
+
+                    console.log(chalk.green(`  Independent Verification Finished.`));
+                    console.log(`Gateway Outcome: ${result.winningOutcome}`);
 
                     // 3. Check for discrepancy
                     if (Number(result.winningOutcome) !== Number(outcome)) {

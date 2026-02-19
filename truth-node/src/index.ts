@@ -6,7 +6,6 @@ import { TruthRelayer } from './services/TruthRelayer';
 import { ChallengerBot } from './services/ChallengerBot';
 import { NodeHealthService } from './services/NodeHealthService';
 import { initViem } from './config/viem';
-import { RecipeExecutor } from '@friehub/execution-engine';
 import { RecipeInstance } from '@friehub/recipes';
 import { WorkerEngine } from './services/WorkerEngine';
 import { logger } from './config/logger';
@@ -20,23 +19,9 @@ app.use(cors());
 
 const PORT = process.env.PORT || 3001;
 
-// Initialize Registry
-import { bootstrapRegistry } from '@friehub/data-feeds';
-import { config as envConfig } from './config/env';
-
-// Register All Truth Data Feeds (including Generic API)
-bootstrapRegistry({
-    financeApiKey: envConfig.NEWS_API_KEY,
-    youtubeApiKey: envConfig.YOUTUBE_API_KEY,
-    sportMonksKey: envConfig.SPORTMONKS_KEY,
-    openWeatherKey: envConfig.OPENWEATHER_API_KEY,
-    fredApiKey: envConfig.FRED_API_KEY,
-    alphaVantageKey: envConfig.ALPHAVANTAGE_KEY,
-    theOddsApiKey: envConfig.THEODDS_API_KEY || envConfig.THEODDS_KEY,
-    groqKey: envConfig.GROQ_API_KEY,
-    useProxy: true,
-    proxyUrl: envConfig.INDEXER_API_URL
-} as any);
+// Node operates in strictly Keyless Mode
+// No local data-fetching registry initialization needed here
+// as all logic is hosted on the Sovereign Backend.
 
 // --- API Routes ---
 
@@ -70,19 +55,26 @@ app.post('/api/templates/simulate', async (req: any, res: any) => {
     }
 
     try {
-        logger.info({ templateName: template.metadata?.name }, '[TruthNode] Simulating temporary template');
-        if (!template) {
-            return res.status(400).json({ error: 'Template is required' });
-        }
-        const recipe = new RecipeInstance(template).toRecipe();
-        const result = await RecipeExecutor.execute(recipe as any, inputs || {});
+        logger.info({ templateName: template.metadata?.name }, '[TruthNode] Starting Local Sovereign Simulation');
+
+        // Configure Local Proxy Mode
+        process.env.TAAS_USE_PROXY = process.env.TAAS_USE_PROXY || 'true';
+        process.env.TAAS_PROXY_URL = process.env.TAAS_PROXY_URL || (process.env.INDEXER_API_URL || 'http://localhost:3002');
+
+        const { RecipeExecutor } = await import('@friehub/execution-engine');
+
+        const recipeInstance = new RecipeInstance(template);
+        const recipe = recipeInstance.toRecipe();
+
+        const executionResult = await RecipeExecutor.execute(recipe as any, inputs || {});
 
         res.json({
-            success: result.success,
-            result
+            success: executionResult.success,
+            truth: executionResult.truth,
+            result: executionResult
         });
     } catch (error: any) {
-        logger.error({ err: error.message }, '[TruthNode] Simulation failed');
+        logger.error({ err: error.message }, '[TruthNode] Local Simulation failed');
         res.status(500).json({ success: false, error: error.message });
     }
 });
@@ -150,21 +142,26 @@ app.get('/api/markets/templates', async (req: any, res: any) => {
 });
 
 app.post('/verify', async (req: any, res: any) => {
-    // Manual trigger for testing/demo purposes
-    // In production, this is triggered by TruthRelayer via on-chain events
     const { recipeId, inputs } = req.body;
     try {
         const recipeInstance = await RecipeRegistry.getInstance().get(recipeId);
         if (!recipeInstance) {
             return res.status(404).json({ error: 'Recipe not found' });
         }
-        const result = await RecipeExecutor.execute(recipeInstance as any, inputs);
+
+        // Configure Local Proxy Mode
+        process.env.TAAS_USE_PROXY = process.env.TAAS_USE_PROXY || 'true';
+        process.env.TAAS_PROXY_URL = process.env.TAAS_PROXY_URL || (process.env.INDEXER_API_URL || 'http://localhost:3002');
+
+        const { RecipeExecutor } = await import('@friehub/execution-engine');
+        const recipe = recipeInstance.toRecipe();
+
+        const executionResult = await RecipeExecutor.execute(recipe as any, inputs || {});
 
         res.json({
-            status: result.success ? 'success' : 'failed',
-            outcome: result.winningOutcome,
-            proof: result.proof,
-            recipeId
+            success: executionResult.success,
+            truth: executionResult.truth,
+            result: executionResult
         });
     } catch (e: any) {
         res.status(500).json({ error: e.message });

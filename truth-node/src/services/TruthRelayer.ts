@@ -1,7 +1,6 @@
 import { decodeAbiParameters, type Hex, parseAbiParameters } from 'viem';
 import { getHeliosPublicClient, getHeliosWalletClient, getAccount } from '../config/viem';
 import TruthOracleABI from '../lib/abi/TruthOracleV2.json';
-import { RecipeExecutor } from '@friehub/execution-engine';
 import { RecipeRegistry, RecipeInstance } from '@friehub/recipes';
 import { heliosChain } from '../config/chains';
 import { addVerificationToQueue } from '../queues/truthQueue';

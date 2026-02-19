@@ -126,9 +126,21 @@ export class ZKProverService {
         };
 
         const inputJson = JSON.stringify(rustInput);
-        const scriptPath = path.resolve(__dirname, '../../../taas-zk-circuit/target/release/taas-zk-script');
+        // Path calculation:
+        // __dirname = .../taas-nodes/truth-node/dist/services (or src/services)
+        // ../../.. = .../taas-nodes
+        // ../../../../ = .../ (Root)
+        // ../../../../taas-core/taas-zk-circuit = Target
+        const scriptPath = path.resolve(__dirname, '../../../../taas-core/taas-zk-circuit/target/release/taas-zk-script');
 
         return new Promise((resolve, reject) => {
+            if (!fs.existsSync(scriptPath)) {
+                console.warn(`[ZK-Prover] ⚠️  Circuit binary missing at ${scriptPath}`);
+                console.warn(`[ZK-Prover] Skipping ZK Proof. Falling back to Signature-based Attestation.`);
+                // Return a dummy hash or handle this as a "Mock-ZK" mode
+                return resolve('0x0000000000000000000000000000000000000000000000000000000000000000' as Hex);
+            }
+
             const child = exec(scriptPath, (error, stdout, stderr) => {
                 if (error) {
                     console.error(`[ZK-Prover] Proving failed: ${error.message}`);

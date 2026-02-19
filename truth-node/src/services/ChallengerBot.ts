@@ -1,8 +1,8 @@
 import { type Hex } from 'viem';
 import { getHeliosPublicClient, getHeliosWalletClient, getAccount } from '../config/viem';
 import TruthOracleABI from '../lib/abi/TruthOracleV2.json';
-import { RecipeExecutor } from '@friehub/execution-engine';
 import { RecipeRegistry, RecipeInstance } from '@friehub/recipes';
+import axios from 'axios';
 import { StateStore } from './StateStore';
 import { logger } from '../config/logger';
 import dotenv from 'dotenv';
@@ -97,10 +97,14 @@ export class ChallengerBot {
                 return;
             }
 
-            logger.info({ requestId, recipeId }, 'Re-executing recipe for verification...');
-            const instance = new RecipeInstance(template);
-            const recipeData = instance.toRecipe();
-            const result = await RecipeExecutor.execute(recipeData as any, inputs);
+            logger.info({ requestId, recipeId }, '[ChallengerBot] Requesting Sovereign Verification from Gateway');
+
+            const response = await axios.post(`${process.env.INDEXER_API_URL || 'http://localhost:3002'}/proxy/verify`, {
+                template: template,
+                inputs
+            });
+
+            const result = response.data.result;
 
             if (!result.success) {
                 logContext.error('Verification failed');

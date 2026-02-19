@@ -1,9 +1,9 @@
 import { Worker, Job } from 'bullmq';
 import { redisConfig } from '../config/redis';
 import { TRUTH_QUEUE_NAME, TruthJobData } from '../queues/truthQueue';
-import { RecipeExecutor } from '@friehub/execution-engine';
 import { RecipeRegistry, RecipeInstance } from '@friehub/recipes';
 import { getPublicClient, getWalletClient, getAccount } from '../config/viem';
+import axios from 'axios';
 import TruthOracleABI from '../abis/TruthOracle.json';
 import { Hex, parseAbi } from 'viem';
 import { ZKProverService } from '../services/ZKProverService';
@@ -43,19 +43,33 @@ export async function processVerification(data: TruthJobData, jobId?: string) {
             throw new Error(`Template ${recipeId} not found in registry.`);
         }
 
-        // 2. Execute Template
-        log.info('Creating RecipeInstance and distilling to executable...');
-        const bpInstance = new RecipeInstance(template);
-        const distilledRecipe = bpInstance.toRecipe();
+        log.info({ templateName: template.metadata?.name }, '[Worker] Starting Local Sovereign Verification...');
 
-        log.info({ logic: distilledRecipe.logic }, 'Distilled Recipe created. Executing...');
-        const result = await RecipeExecutor.execute(distilledRecipe as any, inputs);
+        // 1b. Configure Proxy Mode for Sovereign Logic (Keyless)
+        // This ensures that when StandardFeedPlugin runs, it bootstraps the registry in "Proxy Mode"
+        // if the node doesn't have local API keys.
+        process.env.TAAS_USE_PROXY = process.env.TAAS_USE_PROXY || 'true';
+        process.env.TAAS_PROXY_URL = process.env.TAAS_PROXY_URL || (process.env.INDEXER_API_URL || 'http://localhost:3002');
 
-        if (!result.success) {
-            throw new Error(`Verification logic failed for ${requestId}`);
+        // 2. Execute Logic Locally
+        // Instead of calling axios.post('/verify'), we run the engine right here.
+        // The node IS the computer.
+        const { RecipeExecutor } = await import('@friehub/execution-engine');
+
+        // We must cast the template to the Recipe type expected by the executor
+        // Usually RecipeInstance.toRecipe() handles this, but here we might have the raw JSON
+        const recipeInstance = new RecipeInstance(template);
+        const recipe = recipeInstance.toRecipe();
+
+        const executionResult = await RecipeExecutor.execute(recipe as any, inputs || {});
+
+        if (!executionResult.success) {
+            throw new Error(`Local verification failed for ${requestId}`);
         }
 
-        log.info({ outcome: result.winningOutcome }, 'Outcome Found');
+        const result = executionResult;
+
+        log.info({ outcome: result.winningOutcome, signature: result.signature }, 'Local Execution Successful');
 
         if (result.winningOutcome === null || result.winningOutcome === undefined) {
             throw new Error(`Outcome is null/undefined. Logic failed for ${requestId}`);
@@ -97,6 +111,22 @@ export async function processVerification(data: TruthJobData, jobId?: string) {
             args: [account.address]
         }) as bigint;
         walletBalance.set({ chainId, address: account.address }, Number(tBalance) / 1e18);
+
+        // ============ ZK PROOF GENERATION (V2.5) ============
+        // Now that we have local execution traces, we can generate the ZK Input
+        try {
+            const zkInput = await ZKProverService.prepareInput(recipeId, result);
+            log.info({
+                mode: zkInput.mode,
+                dataHash: zkInput.dataHash,
+                values: zkInput.values.length
+            }, '[ZK] Input Prepared from Local Trace');
+
+            // In a real production node, we would call generateProof(zkInput) here
+            // For now, we just verify the input structure is correct
+        } catch (zkError: any) {
+            logger.warn({ err: zkError.message }, '[ZK] Failed to prepare ZK input (Skipping for now)');
+        }
 
         // ============ V2 RICH OUTCOME PROPOSAL ============
 
