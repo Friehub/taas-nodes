@@ -21,9 +21,17 @@ COPY taas-sdk ./taas-sdk
 # Install dependencies (including private workspaces)
 RUN pnpm install --no-frozen-lockfile
 
-# Build everything
-# This compiles TypeScript to JavaScript in ./dist folders
-RUN pnpm run -r build
+# Build strictly in dependency order to ensure all modules are available
+# 1. Core Logic & SDK
+RUN pnpm --filter @friehub/sovereign-logic run build
+RUN pnpm --filter @friehub/taas-sdk run build
+
+# 2. Execution Engine & Models
+RUN pnpm --filter @friehub/execution-engine run build
+RUN pnpm --filter @friehub/recipes run build
+
+# 3. Finally, the Node itself
+RUN pnpm --filter @friehub/truth-node run build
 
 # --- STAGE 2: Runner ---
 # This is the image the public user gets.

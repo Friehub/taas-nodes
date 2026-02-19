@@ -58,7 +58,7 @@ async function startChallenger() {
                     console.log(chalk.gray(`  Requesting sovereign gate verification...`));
 
                     // Call the Sovereign Gateway instead of local executor
-                    const response = await axios.post(`${GATEWAY_URL}/proxy/verify`, {
+                    const response = await axios.post(`${GATEWAY_URL}/gateway/verify`, {
                         template: templateData,
                         inputs
                     });

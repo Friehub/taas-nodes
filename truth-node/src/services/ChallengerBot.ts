@@ -99,7 +99,7 @@ export class ChallengerBot {
 
             logger.info({ requestId, recipeId }, '[ChallengerBot] Requesting Sovereign Verification from Gateway');
 
-            const response = await axios.post(`${process.env.INDEXER_API_URL || 'http://localhost:3002'}/proxy/verify`, {
+            const response = await axios.post(`${process.env.INDEXER_API_URL || 'http://localhost:3002'}/gateway/verify`, {
                 template: template,
                 inputs
             });
