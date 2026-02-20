@@ -19,10 +19,14 @@ To register a new node, use the official Friehub User Dashboard.
 - Download the generated `.env` configuration bundle.
 
 ### 2. Deployment
-Most nodes are distributed as Docker containers for maximum stability.
-- Ensure the downloaded `.env` file is present in the node directory.
-- Execute `docker-compose up -d`.
 
+> [!IMPORTANT]
+> **Zero-Build Standard**: We strongly recommend using our official Docker images. Cloning this repository and running `pnpm install` on your VPS is unnecessary and may lead to out-of-memory errors on smaller machines.
+
+The standard execution method is via `docker-compose`:
+1. Create your deployment folder (e.g., `mkdir taas-node && cd taas-node`).
+2. Download our official [docker-compose.yml](https://raw.githubusercontent.com/Friehub/taas-nodes/main/truth-node/docker-compose.yml) and your `.env`.
+3. Start the node: `docker-compose up -d`.
 ## Prerequisites
 - Node.js (v20+)
 - Linux/Amd64 environment (Recommended)

@@ -46,16 +46,23 @@ Challengers act as network guardians. They monitor incoming proposals in real-ti
 
 ## Installation
 
-Standard installation via pnpm:
+> [!IMPORTANT]
+> **Registry-First Distribution**: Friehub strictly recommends using pre-built Docker containers. Node operators should **NOT** clone this repository or execute `pnpm build` locally, as this introduces environment fragility and potential build failures on constrainted hardware.
+
+### 1. The Zero-Build Setup
+Create a new directory on your server and download the official provisioning files:
 
 ```bash
-pnpm install
-pnpm run build
+mkdir taas-sentinel && cd taas-sentinel
+wget https://raw.githubusercontent.com/Friehub/taas-nodes/main/truth-node/docker-compose.yml
 ```
 
-## Configuration
+### 2. Configuration
+The FTS Node is designed for "Keyless" operation. Most data provider keys are managed by the centralized Truth Gateway. Create a `.env` file in the same directory:
 
-The FTS Node is designed for "Keyless" operation. Most data provider keys are managed by the centralized Truth Gateway.
+```bash
+touch .env
+```
 
 ### Environment Setup
 
@@ -72,14 +79,22 @@ Configuration is managed via environment variables.
 ## Usage
 
 ### Production Execution
+Start the node and its Redis dependency in the background:
 ```bash
-pnpm start
+docker-compose up -d
 ```
 
-### Development Mode
+View the operational logs:
 ```bash
-pnpm run dev
+docker-compose logs -f truth-node
 ```
+
+### Advanced: Source Code Development
+If you are contributing to the core protocol, you can run the node via source:
+```bash
+pnpm install && pnpm run dev
+```
+*(Not recommended for production Node Operators)*
 
 ## Observability
 

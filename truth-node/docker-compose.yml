@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  truth-node:
+    image: ghcr.io/friehub/truth-node:latest
+    container_name: taas-sentinel
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "4000:4000" # API
+      - "9090:9090" # Prometheus Metrics
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    container_name: taas-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:
